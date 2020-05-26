@@ -19,7 +19,7 @@ def main():
         timeout = int(sys.argv[3])
     except IndexError:
         timeout = 1
-    serialer.start(port, baud_rate, timeout)
+    serialer.init(port, baud_rate, timeout)
 
 
 if __name__ == "__main__":

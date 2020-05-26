@@ -1,10 +1,9 @@
-#!/usr/bin/env python
-# -*- coding: UTF-8 -*-
+import serial
+import time
+import script
 
-import serial, time
 
-
-def start(port, baud_rate, timeout):
+def init(port, baud_rate, timeout):
     print(" - port:" + port)  # 设备端口
     print(" - baud_rate:" + str(baud_rate))  # 波特率
     print(" - timeout:" + str(timeout))  # timeout
@@ -22,7 +21,9 @@ def start(port, baud_rate, timeout):
         print(" - status:FAIL")
         return
 
-    put = bytes([0X57, 0XAB, 0X00, 0X02, 0X08, 0X00, 0X00, 0X04, 0X00, 0X00, 0X00, 0X00, 0X00, 0X10])
+    script.run(com)
+
+    put = bytes([0x57, 0XAB, 0X00, 0X02, 0X08, 0X00, 0X00, 0X04, 0X00, 0X00, 0X00, 0X00, 0X00, 0X10])
     com.write(put)
     time.sleep(1)
     put = bytes([0X57, 0XAB, 0X00, 0X02, 0X08, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X0C])
