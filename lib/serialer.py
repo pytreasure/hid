@@ -23,11 +23,11 @@ def init(port, baud_rate, timeout):
 
     demo.run(com)
 
-    put = bytes([0x57, 0XAB, 0X00, 0X02, 0X08, 0X00, 0X00, 0X04, 0X00, 0X00, 0X00, 0X00, 0X00, 0X10])
-    com.write(put)
-    time.sleep(1)
-    put = bytes([0X57, 0XAB, 0X00, 0X02, 0X08, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X0C])
-    com.write(put)
+    # put = bytes([0x57, 0XAB, 0X00, 0X02, 0X08, 0X00, 0X00, 0X04, 0X00, 0X00, 0X00, 0X00, 0X00, 0X10])
+    # com.write(put)
+    # time.sleep(1)
+    # put = bytes([0X57, 0XAB, 0X00, 0X02, 0X08, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X0C])
+    # com.write(put)
 
 # com.close()
 # 57 AB 00 02 08 00 00 04 00 00 00 00 00 10
