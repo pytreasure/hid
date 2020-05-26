@@ -61,33 +61,40 @@ def keyboard(keys, delay):
                 target_keys["normal"].append(map.keyboard[v])
 
     # 固有头部
-    put = [0X57, 0XAB, 0X00, 0X02, 0X08]
+    put = [0x57, 0xAB, 0x00, 0x02, 0x08]
     # 命令键组合判断
     if target_keys["command"] is not None:
         put.append(target_keys["command"])
     else:
-        put.append(0X00)
-    # 这一位必须是 0X00
-    put.append(0X00)
+        put.append(0x00)
+    # 这一位必须是 0x00
+    put.append(0x00)
     # 最多 6 个组合键
     for i in range(0, 6):
         try:
             put.append(target_keys["normal"][i])
         except TypeError:
-            put.append(0X00)
+            put.append(0x00)
         except IndexError:
-            put.append(0X00)
-    # 收尾
-    put.append(0X10)
+            put.append(0x00)
+    # [累加和]收尾
+    # 关于SUM累加和的理解：SUM = HEAD+ADDR+CMD+LEN+DATA
+    # 如鼠标释放: 57 AB 00 02 08 00 00 00 00 00 00 00 00 0C
+    # SUM=57+AB+2+8=10C，然后只取低位十六进制数0C
+    tail_sum = 0x00
+    for i in put:
+        tail_sum += i
+    _, tail_low = divmod(tail_sum, 0x100)
+    put.append(tail_low)
     # 按下组合键
     hid_com.write(bytes(put))
-    if delay < 10:
-        delay = random.randint(10, 100)
+    if delay < 50:
+        delay = random.randint(50, 99)
     delay = round(0.001 * delay, 2)
     time.sleep(delay)
     # 释放按键
-    hid_com.write(bytes([0X57, 0XAB, 0X00, 0X02, 0X08, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X00, 0X0C]))
-    time.sleep(0.01)
+    hid_com.write(bytes([0x57, 0xAB, 0x00, 0x02, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C]))
+    time.sleep(0.05)
 
 
 def mouse(keys):
