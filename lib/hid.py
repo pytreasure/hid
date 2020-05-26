@@ -1,7 +1,8 @@
 # Core code of HID.
 # Build commands for HID keyboard and mouse.
+
 import time
-import keyword
+from map import keyboard as map_keyboard
 
 hid_com = None
 
