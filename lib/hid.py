@@ -25,7 +25,7 @@ def set_com(which_com):
 
 
 # keys 只支持Command键 + 6个普通按键组合
-# delay 释放延时
+# delay 毫秒，释放延时
 def keyboard(keys, delay):
     global hid_com
 
@@ -88,25 +88,19 @@ def keyboard(keys, delay):
     put.append(tail_low)
     # 按下组合键
     hid_com.write(bytes(put))
-    if delay < 50:
-        delay = random.randint(50, 99)
-    delay = round(0.001 * delay, 2)
-    time.sleep(delay)
+    if delay > 0:
+        time.sleep(0.001 * delay)
     # 释放按键
     hid_com.write(bytes([0x57, 0xAB, 0x00, 0x02, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C]))
-    time.sleep(0.05)
+    # 每次按键后延时一个随机时间
+    time.sleep(round(0.001 * random.randint(50, 99), 2))
+
+
+# keyboard 的拓展,支持一个句子
+def word(words, delay):
+    for k in words:
+        keyboard(k, delay)
 
 
 def mouse(keys):
-    commands = {
-
-    }
-    keys_type = type(keys)
-    if keys_type == "number":
-        keys_type = str(keys_type)
-    if keys_type == "list" or keys_type == "tuple":
-        keys_type = 1
-    elif keys_type == "string":
-        keys_type = 2
-    else:
-        return ()
+    return
