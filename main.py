@@ -1,24 +1,26 @@
 #!/usr/bin/env python
 # -*- coding: UTF-8 -*-
 
-import sys, serial
+import sys
+import serialer
 
-com = serial.Serial('COM3', 9600, timeout=1)
 
-print(" - Hid control By hunzsig @date:20200521!")
-print(" - Name:" + com.name)  # 设备名称
-print(" - Port:" + com.port)  # 设备端口
-print(" - BaudRate:" + str(com.baudrate))  # 波特率
-print(" - ByteSize:" + str(com.bytesize))  # 比特大小
-print(" - BreakCondition:" + str(com.break_condition))  # 校验位
+def main():
+    try:
+        port = sys.argv[1]
+    except IndexError:
+        print("You command maybe: python main.py com1 9600 1")
+        sys.exit()
+    try:
+        baud_rate = int(sys.argv[2])
+    except IndexError:
+        baud_rate = 9600
+    try:
+        timeout = int(sys.argv[3])
+    except IndexError:
+        timeout = 1
+    serialer.start(port, baud_rate, timeout)
 
-if com.isOpen():
-    print(" - Open:OK")
-else:
-    sys.exit()
 
-print(" - Ready")
-
-# com.close()
-# 57 AB 00 02 08 00 00 04 00 00 00 00 00 10
-# 57 AB 00 02 08 00 00 00 00 00 00 00 00 0C
+if __name__ == "__main__":
+    main()
