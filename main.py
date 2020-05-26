@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 import sys
-import serialer
+from lib import serialer
 
 
 def main():

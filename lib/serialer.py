@@ -1,6 +1,6 @@
 import serial
 import time
-import script
+from scripts import demo
 
 
 def init(port, baud_rate, timeout):
@@ -21,7 +21,7 @@ def init(port, baud_rate, timeout):
         print(" - status:FAIL")
         return
 
-    script.run(com)
+    demo.run(com)
 
     put = bytes([0x57, 0XAB, 0X00, 0X02, 0X08, 0X00, 0X00, 0X04, 0X00, 0X00, 0X00, 0X00, 0X00, 0X10])
     com.write(put)
