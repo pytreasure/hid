@@ -2,6 +2,7 @@
 # Build commands for HID keyboard and mouse.
 
 import time
+import math
 import tkinter
 from lib import map
 
@@ -39,6 +40,20 @@ def get_tail_low(put):
         tail_sum += i
     _, tail_low = divmod(tail_sum, 0x100)
     return tail_low
+
+
+# 获取鼠标xyz轴的偏移值
+def get_xyz(val):
+    val = math.floor(val)
+    offset = 0
+    if val > 0:
+        if val > 127:
+            offset = 127
+    elif val < 0:
+        if val < -127:
+            val = -127
+        offset = 256 - abs(val)
+    return offset
 
 
 # 释放键盘
@@ -123,7 +138,7 @@ def word(words, delay):
         keyboard(k, delay)
 
 
-def mouse(move_type, button, x, y, delay):
+def mouse(move_type, button, x, y, z, delay):
     # 固有头部
     if move_type == "A":  # absolute
         put = [0x57, 0xAB, 0x00, 0x05, 0x05, 0x01]
@@ -153,9 +168,22 @@ def mouse(move_type, button, x, y, delay):
             put.append(y_low)
             put.append(y_high)
     elif move_type == "R":
-        put.append(0)  #
-        put.append(0)
-    put.append(0x00)
+        # x偏移像素
+        # 向右为 1->127，向左为 -1->-127
+        # 向右为 0x01->0x7F，向左为 0x80->0xFF
+        if x is None:
+            put.append(0x00)
+        else:
+            put.append(get_xyz(x))
+        if y is None:
+            put.append(0x00)  # y偏移
+        else:
+            put.append(get_xyz(y))
+    # 滚轮 z轴
+    if z is None:
+        put.append(0x00)
+    else:
+        put.append(get_xyz(z))
     # [累加和]收尾
     put.append(get_tail_low(put))
     if delay > 0:
