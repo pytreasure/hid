@@ -5,6 +5,11 @@ import time
 import tkinter
 from lib import map
 
+tk = tkinter.Tk()
+screen_width = tk.winfo_screenwidth()
+screen_height = tk.winfo_screenheight()
+tk.destroy()
+
 hid_com = None
 
 hid_command_keys = [
@@ -137,14 +142,16 @@ def mouse(move_type, button, x, y, delay):
             put.append(0x00)  # x坐标低位
             put.append(0x00)  # x坐标高位
         else:
-            put.append(0x00)
-            put.append(0x00)
+            x_high, x_low = divmod((100 * 4096) / screen_width, 0x100)
+            put.append(x_low)
+            put.append(x_high)
         if y is None:
             put.append(0)  # y坐标低位
             put.append(0)  # y坐标高位
         else:
-            put.append(0x00)
-            put.append(0x00)
+            y_high, y_low = divmod((100 * 4096) / screen_height, 0x100)
+            put.append(y_low)
+            put.append(y_high)
     elif move_type == "R":
         put.append(0)  #
         put.append(0)
