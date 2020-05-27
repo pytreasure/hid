@@ -23,6 +23,18 @@ def set_com(which_com):
     hid_com = which_com
 
 
+# [累加和]收尾
+# 关于SUM累加和的理解：SUM = HEAD+ADDR+CMD+LEN+DATA
+# 如鼠标释放: 57 AB 00 02 08 00 00 00 00 00 00 00 00 0C
+# SUM=57+AB+2+8=10C，然后只取低位十六进制数0C
+def get_tail_low(put):
+    tail_sum = 0x00
+    for i in put:
+        tail_sum += i
+    _, tail_low = divmod(tail_sum, 0x100)
+    return tail_low
+
+
 # 释放键盘
 def keyboard_free():
     global hid_com
@@ -91,14 +103,7 @@ def keyboard(keys, delay):
         except IndexError:
             put.append(0x00)
     # [累加和]收尾
-    # 关于SUM累加和的理解：SUM = HEAD+ADDR+CMD+LEN+DATA
-    # 如鼠标释放: 57 AB 00 02 08 00 00 00 00 00 00 00 00 0C
-    # SUM=57+AB+2+8=10C，然后只取低位十六进制数0C
-    tail_sum = 0x00
-    for i in put:
-        tail_sum += i
-    _, tail_low = divmod(tail_sum, 0x100)
-    put.append(tail_low)
+    put.append(get_tail_low(put))
     # 按下组合键
     hid_com.write(bytes(put))
     if delay > 0:
@@ -112,5 +117,36 @@ def word(words, delay):
         keyboard(k, delay)
 
 
-def mouse(keys):
-    return
+def mouse(move_type, button, x, y, delay):
+    # 固有头部
+    if move_type == "A":  # absolute
+        put = [0x57, 0xAB, 0x00, 0x05, 0x05, 0x01]
+    elif move_type == "R":  # relation
+        put = [0x57, 0xAB, 0x00, 0x04, 0x07, 0x02]
+    else:
+        return
+    # 哪个按键
+    if button is None:
+        put.append(0x00)
+    else:
+        put.append(map.mouse[button])
+    # 不同的移动附加不同的数据
+    if move_type == "absolute":
+        put.append(0)  # x坐标低位
+        put.append(0)  # x坐标高位
+        put.append(0)  # y坐标低位
+        put.append(0)  # y坐标高位
+    elif move_type == "relation":
+        put.append(0)  #
+        put.append(0)
+    put.append(0x00)
+    # 最多 6 个组合键
+    for i in range(0, 6):
+        try:
+            put.append(target_keys["normal"][i])
+        except TypeError:
+            put.append(0x00)
+        except IndexError:
+            put.append(0x00)
+    # [累加和]收尾
+    put.append(get_tail_low(put))
