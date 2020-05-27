@@ -2,6 +2,7 @@
 # Build commands for HID keyboard and mouse.
 
 import time
+import tkinter
 from lib import map
 
 hid_com = None
@@ -131,22 +132,24 @@ def mouse(move_type, button, x, y, delay):
     else:
         put.append(map.mouse[button])
     # 不同的移动附加不同的数据
-    if move_type == "absolute":
-        put.append(0)  # x坐标低位
-        put.append(0)  # x坐标高位
-        put.append(0)  # y坐标低位
-        put.append(0)  # y坐标高位
-    elif move_type == "relation":
+    if move_type == "A":
+        if x is None:
+            put.append(0x00)  # x坐标低位
+            put.append(0x00)  # x坐标高位
+        else:
+            put.append(0x00)
+            put.append(0x00)
+        if y is None:
+            put.append(0)  # y坐标低位
+            put.append(0)  # y坐标高位
+        else:
+            put.append(0x00)
+            put.append(0x00)
+    elif move_type == "R":
         put.append(0)  #
         put.append(0)
     put.append(0x00)
-    # 最多 6 个组合键
-    for i in range(0, 6):
-        try:
-            put.append(target_keys["normal"][i])
-        except TypeError:
-            put.append(0x00)
-        except IndexError:
-            put.append(0x00)
     # [累加和]收尾
     put.append(get_tail_low(put))
+    if delay > 0:
+        time.sleep(0.001 * delay)
