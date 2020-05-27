@@ -2,7 +2,6 @@
 # Build commands for HID keyboard and mouse.
 
 import time
-import random
 from lib import map
 
 hid_com = None
