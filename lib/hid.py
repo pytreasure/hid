@@ -24,6 +24,20 @@ def set_com(which_com):
     hid_com = which_com
 
 
+# 释放键盘
+def keyboard_free():
+    global hid_com
+    hid_com.write(bytes([0x57, 0xAB, 0x00, 0x02, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C]))
+    time.sleep(round(0.001 * random.randint(60, 90), 2))
+
+
+# 释放鼠标
+def mouse_free():
+    global hid_com
+    hid_com.write(bytes([0x57, 0xAB, 0x00, 0x05, 0x05, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C]))
+    time.sleep(round(0.001 * random.randint(60, 90), 2))
+
+
 # keys 只支持Command键 + 6个普通按键组合
 # delay 毫秒，释放延时
 def keyboard(keys, delay):
@@ -90,10 +104,7 @@ def keyboard(keys, delay):
     hid_com.write(bytes(put))
     if delay > 0:
         time.sleep(0.001 * delay)
-    # 释放按键
-    hid_com.write(bytes([0x57, 0xAB, 0x00, 0x02, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C]))
-    # 每次按键后延时一个随机时间
-    time.sleep(round(0.001 * random.randint(50, 99), 2))
+    keyboard_free()
 
 
 # keyboard 的拓展,支持一个句子

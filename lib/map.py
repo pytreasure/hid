@@ -1,4 +1,5 @@
 # keyboard map
+# mouse map
 
 keyboard = {
     "LEFT_CTRL": 0x01,
@@ -104,4 +105,10 @@ keyboard = {
     "N0": 0x62,  # 小键盘
     "N.": 0x63,  # 小键盘
     "DOCUMENT": 0x65,
+}
+
+mouse = {
+    "LEFT": 0x01,
+    "RIGHT": 0x02,
+    "MID": 0x04,
 }

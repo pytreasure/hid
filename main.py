@@ -8,18 +8,11 @@ from lib import serialer
 def main():
     try:
         port = sys.argv[1]
+        script = sys.argv[2]
     except IndexError:
-        print("You command maybe: python main.py com1 9600 1")
+        print("You command maybe: python main.py com1 pop_kart")
         sys.exit()
-    try:
-        baud_rate = int(sys.argv[2])
-    except IndexError:
-        baud_rate = 9600
-    try:
-        timeout = int(sys.argv[3])
-    except IndexError:
-        timeout = 1
-    serialer.init(port, baud_rate, timeout)
+    serialer.init(port, script)
 
 
 if __name__ == "__main__":
