@@ -38,10 +38,11 @@ def shot_title(title, save_dir):
         app = QApplication(sys.argv)
         screen = QApplication.primaryScreen()
         wid = win32gui.FindWindow(None, title)
+        rect = win32gui.GetWindowRect()
         w = screen.grabWindow(wid)
         img = w.toImage()
         img.save(save_dir + title + "_" + str(time.time()) + ".jpg")
 
 
-shot_all("C:/Users/hunzs/Desktop/py/")
+# shot_all("C:/Users/hunzs/Desktop/py/")
 shot_title("Fork 1.46.1.0", "C:/Users/hunzs/Desktop/py/")
