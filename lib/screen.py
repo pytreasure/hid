@@ -1,7 +1,5 @@
 import win32gui
-from PyQt5 import QtCore
 from PyQt5.QtWidgets import QApplication
-from PyQt5.QtGui import *
 import sys
 import time
 
