@@ -38,10 +38,12 @@ def shot_title(title, save_dir):
         app = QApplication(sys.argv)
         screen = QApplication.primaryScreen()
         wid = win32gui.FindWindow(None, title)
-        rect = win32gui.GetWindowRect()
-        w = screen.grabWindow(wid)
-        img = w.toImage()
-        img.save(save_dir + title + "_" + str(time.time()) + ".jpg")
+        if wid > 0:
+            rect = win32gui.GetWindowRect(wid)
+            print(rect)
+            w = screen.grabWindow(wid)
+            img = w.toImage()
+            img.save(save_dir + title + "_" + str(time.time()) + ".jpg")
 
 
 # shot_all("C:/Users/hunzs/Desktop/py/")
