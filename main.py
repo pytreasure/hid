@@ -2,9 +2,8 @@
 # -*- coding: UTF-8 -*-
 
 import sys
-import tkinter
 from lib import serialer
-
+from lib import screen
 
 def main():
     try:
@@ -13,11 +12,6 @@ def main():
     except IndexError:
         print("You command maybe: python main.py com1 pop_kart")
         sys.exit()
-
-    tk = tkinter.Tk()
-    print(tk.winfo_screenwidth())
-    print(tk.winfo_screenheight())
-    tk.destroy()
 
     # serialer.init(port, script)
 
