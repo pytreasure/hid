@@ -9,10 +9,9 @@ import sys
 import time
 import math
 
+
 # DPI支持
 # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
-
-hwnd_windows = dict()
 
 
 # 获取真实的分辨率
@@ -44,13 +43,14 @@ def get_zoom_ratio():
 
 
 def all_hwnd(hwnd, mouse):
+    hwnd_windows = dict()
     if win32gui.IsWindow(hwnd) and win32gui.IsWindowEnabled(hwnd) and win32gui.IsWindowVisible(hwnd):
         hwnd_windows.update({hwnd: win32gui.GetWindowText(hwnd)})
+    return hwnd_windows
 
 
 def get_all_window_items():
-    win32gui.EnumWindows(all_hwnd, 0)
-    return hwnd_windows.items()
+    return win32gui.EnumWindows(all_hwnd, 0).items()
 
 
 # 把屏幕上所有窗口截图

@@ -3,13 +3,7 @@
 
 import time
 import math
-import tkinter
 from chip.ch9329 import map
-
-tk = tkinter.Tk()
-screen_width = tk.winfo_screenwidth()
-screen_height = tk.winfo_screenheight()
-tk.destroy()
 
 hid_com = None
 

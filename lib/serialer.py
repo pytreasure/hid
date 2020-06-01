@@ -1,6 +1,7 @@
 import serial
 import time
 from scripts import pop_kart
+from scripts import koei_sango
 
 
 def init(port, script):
