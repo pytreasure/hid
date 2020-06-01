@@ -78,6 +78,7 @@ def shot_title(title, save_dir):
             img.save(save_dir + title + "_" + str(time.time()) + ".jpg")
 
 
+# 去除边框毛玻璃的区域
 def get_window_real_rect(hwnd):
     try:
         f = ctypes.windll.dwmapi.DwmGetWindowAttribute
@@ -90,6 +91,7 @@ def get_window_real_rect(hwnd):
 
 
 # 根据title获取窗口区域
+# 坐标由左上角到右下角
 def get_window_rect(title):
     if title != "":
         app = QApplication(sys.argv)
@@ -102,8 +104,6 @@ def get_window_rect(title):
             if rect[0] < 0 and rect[1] < 0 and rect[2] < 0 and rect[3] < 0:
                 print("window")
                 return
-            print(rect)
-            print(ratio)
             return {
                 "x_start": math.floor(rect[0] / ratio),
                 "y_start": math.floor(rect[1] / ratio),
