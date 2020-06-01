@@ -1,12 +1,11 @@
 # Core code of HID.
 # Build commands for HID keyboard and mouse.
 
-import time
-from lib import hid
+from chip.ch9329 import control
 
 
 def run(com):  # 跑脚本
-    hid.set_com(com)  # 设置端口
+    control.set_com(com)  # 设置端口
     # # 上来先释放一波
     # hid.keyboard_free()
     # hid.mouse_free()
