@@ -184,6 +184,10 @@ def mouse(move_type, button, x, y, z, delay):
     put.append(get_tail_low(put))
     if delay > 0:
         time.sleep(0.001 * delay)
+
+    for i in put:
+        print('%#x' % i)
+
     # 操作鼠标
     hid_com.write(bytes(put))
     if delay > 0:
