@@ -3,7 +3,6 @@ import win32api
 import win32gui
 import win32print
 import win32con
-import tkinter
 from PyQt5.QtWidgets import QApplication
 import sys
 import time
@@ -12,6 +11,13 @@ import math
 
 # DPI支持
 # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
+
+
+# 获取屏幕分辨率缩放比例
+def get_zoom_ratio():
+    hdc = win32gui.GetDC(0)
+    dpi = win32print.GetDeviceCaps(hdc, win32con.LOGPIXELSX)
+    return round(dpi / 96, 2)
 
 
 # 获取真实的分辨率
@@ -24,22 +30,9 @@ def get_real_resolution():
 
 # 获取缩放后的分辨率
 def get_zoom_resolution():
-    # w = win32api.GetSystemMetrics(win32con.SM_CXSCREEN)
-    # h = win32api.GetSystemMetrics(win32con.SM_CYSCREEN)
-    tk = tkinter.Tk()
-    w = tk.winfo_screenwidth()
-    h = tk.winfo_screenheight()
-    tk.destroy()
-    return w, h
-
-
-# 获取屏幕分辨率缩放比例
-def get_zoom_ratio():
-    wh_real = get_real_resolution()
-    wh_zoom = get_zoom_resolution()
-    print(wh_real)
-    print(wh_zoom)
-    return round(wh_real[0] / wh_zoom[0], 2)
+    real = get_real_resolution()
+    ratio = get_zoom_ratio()
+    return math.floor(real[0] / ratio), math.floor(real[1] / ratio)
 
 
 def all_hwnd(hwnd, mouse):
@@ -102,7 +95,7 @@ def get_window_rect(title):
             # rect = get_window_real_rect(wid)
             ratio = get_zoom_ratio()
             if rect[0] < 0 and rect[1] < 0 and rect[2] < 0 and rect[3] < 0:
-                print("window")
+                print("window minimized")
                 return
             return {
                 "x_start": math.floor(rect[0] / ratio),

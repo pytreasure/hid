@@ -3,6 +3,7 @@
 
 import time
 import math
+from lib import screen
 from chip.ch9329 import map
 
 hid_com = None
@@ -135,9 +136,9 @@ def word(words, delay):
 def mouse(move_type, button, x, y, z, delay):
     # 固有头部
     if move_type == "A":  # absolute
-        put = [0x57, 0xAB, 0x00, 0x05, 0x05, 0x01]
-    elif move_type == "R":  # relation
         put = [0x57, 0xAB, 0x00, 0x04, 0x07, 0x02]
+    elif move_type == "R":  # relation
+        put = [0x57, 0xAB, 0x00, 0x05, 0x05, 0x01]
     else:
         return
     # 哪个按键
@@ -146,19 +147,20 @@ def mouse(move_type, button, x, y, z, delay):
     else:
         put.append(map.mouse[button])
     # 不同的移动附加不同的数据
+    screen_resolution = screen.get_zoom_resolution()
     if move_type == "A":
         if x is None:
             put.append(0x00)  # x坐标低位
             put.append(0x00)  # x坐标高位
         else:
-            x_high, x_low = divmod((100 * 4096) / screen_width, 0x100)
+            x_high, x_low = divmod(math.floor(x * 4096 / screen_resolution[0]), 0x100)
             put.append(x_low)
             put.append(x_high)
         if y is None:
             put.append(0)  # y坐标低位
             put.append(0)  # y坐标高位
         else:
-            y_high, y_low = divmod((100 * 4096) / screen_height, 0x100)
+            y_high, y_low = divmod(math.floor(y * 4096 / screen_resolution[1]), 0x100)
             put.append(y_low)
             put.append(y_high)
     elif move_type == "R":
@@ -182,3 +184,8 @@ def mouse(move_type, button, x, y, z, delay):
     put.append(get_tail_low(put))
     if delay > 0:
         time.sleep(0.001 * delay)
+    # 操作鼠标
+    hid_com.write(bytes(put))
+    if delay > 0:
+        time.sleep(0.001 * delay)
+    mouse_free()
