@@ -3,7 +3,7 @@
 
 import sys
 from lib import serialer
-from lib import screen
+
 
 def main():
     try:
@@ -13,7 +13,7 @@ def main():
         print("You command maybe: python main.py com1 pop_kart")
         sys.exit()
 
-    # serialer.init(port, script)
+    serialer.init(port, script)
 
 
 if __name__ == "__main__":

@@ -1,12 +1,46 @@
+import ctypes
+import win32api
 import win32gui
+import win32print
+import win32con
+import tkinter
 from PyQt5.QtWidgets import QApplication
 import sys
 import time
+import math
 
 # DPI支持
 # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
 
 hwnd_windows = dict()
+
+
+# 获取真实的分辨率
+def get_real_resolution():
+    hdc = win32gui.GetDC(0)
+    w = win32print.GetDeviceCaps(hdc, win32con.DESKTOPHORZRES)
+    h = win32print.GetDeviceCaps(hdc, win32con.DESKTOPVERTRES)
+    return w, h
+
+
+# 获取缩放后的分辨率
+def get_zoom_resolution():
+    # w = win32api.GetSystemMetrics(win32con.SM_CXSCREEN)
+    # h = win32api.GetSystemMetrics(win32con.SM_CYSCREEN)
+    tk = tkinter.Tk()
+    w = tk.winfo_screenwidth()
+    h = tk.winfo_screenheight()
+    tk.destroy()
+    return w, h
+
+
+# 获取屏幕分辨率缩放比例
+def get_zoom_ratio():
+    wh_real = get_real_resolution()
+    wh_zoom = get_zoom_resolution()
+    print(wh_real)
+    print(wh_zoom)
+    return round(wh_real[0] / wh_zoom[0], 2)
 
 
 def all_hwnd(hwnd, mouse):
@@ -39,12 +73,40 @@ def shot_title(title, save_dir):
         screen = QApplication.primaryScreen()
         wid = win32gui.FindWindow(None, title)
         if wid > 0:
-            rect = win32gui.GetWindowRect(wid)
-            print(rect)
             w = screen.grabWindow(wid)
             img = w.toImage()
             img.save(save_dir + title + "_" + str(time.time()) + ".jpg")
 
 
-# shot_all("C:/Users/hunzs/Desktop/py/")
-shot_title("Fork 1.46.1.0", "C:/Users/hunzs/Desktop/py/")
+def get_window_real_rect(hwnd):
+    try:
+        f = ctypes.windll.dwmapi.DwmGetWindowAttribute
+    except WindowsError:
+        f = None
+    if f:
+        rect = ctypes.wintypes.RECT()
+        f(ctypes.wintypes.HWND(hwnd), ctypes.wintypes.DWORD(9), ctypes.byref(rect), ctypes.sizeof(rect))
+        return rect.left, rect.top, rect.right, rect.bottom
+
+
+# 根据title获取窗口区域
+def get_window_rect(title):
+    if title != "":
+        app = QApplication(sys.argv)
+        screen = QApplication.primaryScreen()
+        wid = win32gui.FindWindow(None, title)
+        if wid > 0:
+            rect = win32gui.GetWindowRect(wid)
+            # rect = get_window_real_rect(wid)
+            ratio = get_zoom_ratio()
+            if rect[0] < 0 and rect[1] < 0 and rect[2] < 0 and rect[3] < 0:
+                print("window")
+                return
+            print(rect)
+            print(ratio)
+            return {
+                "x_start": math.floor(rect[0] / ratio),
+                "y_start": math.floor(rect[1] / ratio),
+                "x_end": math.floor(rect[2] / ratio),
+                "y_end": math.floor(rect[3] / ratio),
+            }
