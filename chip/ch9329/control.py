@@ -3,6 +3,7 @@
 
 import time
 import math
+import pyautogui
 from lib import screen
 from chip.ch9329 import map
 
@@ -39,6 +40,8 @@ def get_tail_low(put):
 
 # 获取鼠标xyz轴的偏移值
 def get_xyz(val):
+    if val == 0:
+        return 0
     val = math.floor(val)
     offset = 0
     if val > 0:
@@ -54,14 +57,9 @@ def get_xyz(val):
 # 释放键盘
 def keyboard_free():
     global hid_com
+    if hid_com is None:
+        return
     hid_com.write(bytes([0x57, 0xAB, 0x00, 0x02, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0C]))
-    time.sleep(0.075)
-
-
-# 释放鼠标
-def mouse_free():
-    global hid_com
-    hid_com.write(bytes([0x57, 0xAB, 0x00, 0x05, 0x05, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0D]))
     time.sleep(0.075)
 
 
@@ -69,15 +67,12 @@ def mouse_free():
 # delay 毫秒，释放延时
 def keyboard(keys, delay):
     global hid_com
-
     if hid_com is None:
         return
-
     target_keys = {
         "command": None,
         "normal": []
     }
-
     keys_type = type(keys)
     if keys_type == str:
         keys = str.upper(keys)
@@ -133,63 +128,115 @@ def word(words, delay):
         keyboard(k, delay)
 
 
-def mouse(move_type, button, x, y, z, delay):
-    # 固有头部
-    if move_type == "A":  # absolute
-        put = [0x57, 0xAB, 0x00, 0x04, 0x07, 0x02]
-    elif move_type == "R":  # relation
-        put = [0x57, 0xAB, 0x00, 0x05, 0x05, 0x01]
-    else:
+# 当前鼠标按键
+mouse_cur_btn = "NONE"
+
+
+# 鼠标立刻移动到(x,y)
+def mouse_portal(x, y):
+    if x is None or y is None:
         return
-    # 哪个按键
-    if button is None:
-        put.append(0x00)
-    else:
-        put.append(map.mouse[button])
-    # 不同的移动附加不同的数据
+    global hid_com
+    if hid_com is None:
+        return
+    put = [0x57, 0xAB, 0x00, 0x04, 0x07, 0x02, 0x00]
     screen_resolution = screen.get_zoom_resolution()
-    if move_type == "A":
-        if x is None:
-            put.append(0x00)  # x坐标低位
-            put.append(0x00)  # x坐标高位
-        else:
-            x_high, x_low = divmod(math.floor(x * 4096 / screen_resolution[0]), 0x100)
-            put.append(x_low)
-            put.append(x_high)
-        if y is None:
-            put.append(0)  # y坐标低位
-            put.append(0)  # y坐标高位
-        else:
-            y_high, y_low = divmod(math.floor(y * 4096 / screen_resolution[1]), 0x100)
-            put.append(y_low)
-            put.append(y_high)
-    elif move_type == "R":
-        # x偏移像素
-        # 向右为 1->127，向左为 -1->-127
-        # 向右为 0x01->0x7F，向左为 0x80->0xFF
-        if x is None:
-            put.append(0x00)
-        else:
-            put.append(get_xyz(x))
-        if y is None:
-            put.append(0x00)  # y偏移
-        else:
-            put.append(get_xyz(y))
-    # 滚轮 z轴
-    if z is None:
-        put.append(0x00)
+    if x is None:
+        put.append(0x00)  # x坐标低位
+        put.append(0x00)  # x坐标高位
     else:
-        put.append(get_xyz(z))
+        x_high, x_low = divmod(math.floor(x * 4096 / screen_resolution[0]), 0x100)
+        put.append(x_low)
+        put.append(x_high)
+    if y is None:
+        put.append(0)  # y坐标低位
+        put.append(0)  # y坐标高位
+    else:
+        y_high, y_low = divmod(math.floor(y * 4096 / screen_resolution[1]), 0x100)
+        put.append(y_low)
+        put.append(y_high)
+    put.append(0x00)
     # [累加和]收尾
     put.append(get_tail_low(put))
-    if delay > 0:
-        time.sleep(0.001 * delay)
-
-    for i in put:
-        print('%#x' % i)
-
     # 操作鼠标
     hid_com.write(bytes(put))
-    if delay > 0:
-        time.sleep(0.001 * delay)
-    mouse_free()
+    time.sleep(0.1)
+
+
+# 鼠标移动到(x,y)
+# x偏移像素
+# 向右为 1->127，向左为 -1->-127
+# 向右为 0x01->0x7F，向左为 0x80->0xFF
+def mouse_move(x, y):
+    if x is None or y is None:
+        return
+    global hid_com
+    if hid_com is None:
+        return
+    # 获取当前鼠标的位置
+    ptx, pty = pyautogui.position()
+    while (True):
+        px = math.floor((x - ptx) / 50)
+        py = math.floor((y - pty) / 30)
+        if abs(px) < 10:
+            px = 0
+        if abs(py) < 10:
+            py = 0
+        if abs(px) < 10 and abs(py) < 10:
+            break
+        put = [
+            0x57, 0xAB, 0x00, 0x05, 0x05, 0x01,
+            map.mouse[mouse_cur_btn],
+            get_xyz(px),
+            get_xyz(py),
+            0x00
+        ]
+        # [累加和]收尾
+        put.append(get_tail_low(put))
+        # 操作鼠标
+        hid_com.write(bytes(put))
+        time.sleep(0.02)
+
+
+# 鼠标中键滚轮滚动
+def mouse_roll(z):
+    if z is None:
+        return
+    global hid_com
+    if hid_com is None:
+        return
+    # [固定头部 0 - 5 ,按键 6, 0 0 0]
+    put = [0x57, 0xAB, 0x00, 0x05, 0x05, 0x01, 0x00, 0x00, 0x00, get_xyz(z), 0x00]
+    # [累加和]收尾
+    put.append(get_tail_low(put))
+    # 操作鼠标
+    hid_com.write(bytes(put))
+    time.sleep(0.1)
+
+
+# 按下鼠标（不释放）
+# button LEFT | RIGHT | MID
+def mouse_press(button):
+    if button is None:
+        return
+    global hid_com
+    if hid_com is None:
+        return
+    # [固定头部 0 - 5 ,按键 6, 0 0 0]
+    put = [0x57, 0xAB, 0x00, 0x05, 0x05, 0x01, map.mouse[button], 0x00, 0x00, 0x00]
+    # [累加和]收尾
+    put.append(get_tail_low(put))
+    # 操作鼠标
+    hid_com.write(bytes(put))
+    time.sleep(0.1)
+
+
+# 释放鼠标
+def mouse_free():
+    global mouse_cur_btn
+    mouse_cur_btn = "NONE"
+    global hid_com
+    if hid_com is None:
+        return
+    hid_com.write(bytes([0x57, 0xAB, 0x00, 0x05, 0x05, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0D]))
+    time.sleep(0.1)

@@ -108,6 +108,7 @@ keyboard = {
 }
 
 mouse = {
+    "NONE": 0x00,
     "LEFT": 0x01,
     "RIGHT": 0x02,
     "MID": 0x04,
