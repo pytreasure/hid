@@ -1,4 +1,5 @@
 import math
+import random
 from chip.ch9329 import control
 from lib import screen
 from scripts.koei_sango import position
@@ -21,7 +22,12 @@ def run(com):  # 跑脚本
     control.mouse_free()
 
     #
-    control.mouse_move(xy_percent(rect, position.bar))
+    start = xy_percent(rect, position.bar)
+    control.mouse_move(start)
     control.mouse_press("LEFT")
-    control.mouse_move({"x": 100, "y": 100})
+    limit = 50
+    while limit > 0:
+        control.mouse_move({"x": random.randint(0, 2000), "y": random.randint(0, 800)})
+        limit -= 1
+    control.mouse_move(start)
     control.mouse_free()

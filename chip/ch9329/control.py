@@ -7,6 +7,9 @@ import random
 from lib import screen
 from chip.ch9329 import map
 
+screen_resolution = screen.get_zoom_resolution()
+screen_ratio = screen.get_zoom_ratio()
+
 hid_com = None
 
 hid_command_keys = [
@@ -137,12 +140,15 @@ def mouse_portal(position):
     global hid_com
     x = position["x"]
     y = position["y"]
-    if x is None or y is None:
+    if x is None or y is None or x < 0 or y < 0:
         return
     if hid_com is None:
         return
+    if x > screen_resolution[0] - 50:
+        x = screen_resolution[0] - 50
+    if y > screen_resolution[1] - 50:
+        y = screen_resolution[1] - 50
     put = [0x57, 0xAB, 0x00, 0x04, 0x07, 0x02, 0x00]
-    screen_resolution = screen.get_zoom_resolution()
     if x is None:
         put.append(0x00)  # x坐标低位
         put.append(0x00)  # x坐标高位
@@ -174,15 +180,20 @@ def mouse_move(position):
     global hid_com
     x = position["x"]
     y = position["y"]
-    if x is None or y is None:
+    if x is None or y is None or x < 0 or y < 0:
         return
     if hid_com is None:
         return
+
+    if x > screen_resolution[0] - 50:
+        x = screen_resolution[0] - 50
+    if y > screen_resolution[1] - 50:
+        y = screen_resolution[1] - 50
+
     # 获取当前鼠标的位置
-    ratio = screen.get_zoom_ratio()
     sx, sy = screen.get_mouse_position()
 
-    step = math.floor(ratio * 8)
+    step = math.floor(screen_ratio * random.randint(5, 6))
     abs_x = abs(x - sx)
     abs_y = abs(y - sy)
 
@@ -200,16 +211,12 @@ def mouse_move(position):
     elif px == 0:
         py = step if y > sy else -step
     else:
-        py = math.floor(px / (x - sx) * (y - sy))
+        py = math.floor(abs(px) / abs_x * (y - sy))
 
-    limit = 0
+    print({"px": px, "py": py})
+
     while True:
-        limit += 1
-        if limit > 100:
-            break
         ex, ey = screen.get_mouse_position()
-
-        print(px, py, x, y, ex, ey)
         # px
         if px > 0 and ex >= x:
             px = 0
@@ -226,15 +233,15 @@ def mouse_move(position):
         put = [
             0x57, 0xAB, 0x00, 0x05, 0x05, 0x01,
             map.mouse[mouse_cur_btn],
-            get_xyz(px + random.randint(-2, 2)),
-            get_xyz(py + random.randint(-2, 2)),
+            get_xyz(px + random.randint(-1, 1)),
+            get_xyz(py + random.randint(-1, 1)),
             0x00
         ]
         # [累加和]收尾
         put.append(get_tail_low(put))
         # 操作鼠标
         hid_com.write(bytes(put))
-        time.sleep(0.03)
+        time.sleep(0.01)
 
 
 # 鼠标中键滚轮滚动
