@@ -78,6 +78,15 @@ def shot_title(title, save_dir):
             img.save(save_dir + title + "_" + str(time.time()) + ".jpg")
 
 
+# 分析区域
+# 最小化时截图黑色
+def captura(rect):
+    app = QApplication(sys.argv)
+    screen = QApplication.primaryScreen()
+    w = screen.grabWindow(rect["hwnd"], rect["x"], rect["y"], rect["w"], rect["h"])
+    img = w.toImage()
+
+
 # 去除边框毛玻璃的区域
 def get_window_real_rect(hwnd):
     try:
@@ -105,6 +114,7 @@ def get_window_rect(title):
                 print("window minimized")
                 return
             return {
+                "hwnd": wid,
                 "x_start": math.floor(rect[0] / ratio),
                 "y_start": math.floor(rect[1] / ratio),
                 "x_end": math.floor(rect[2] / ratio),
