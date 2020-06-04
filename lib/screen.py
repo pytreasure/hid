@@ -1,12 +1,12 @@
 import ctypes
-import win32api
 import win32gui
 import win32print
 import win32con
-from PyQt5.QtWidgets import QApplication
+import pyautogui
 import sys
 import time
 import math
+from PyQt5.QtWidgets import QApplication
 
 
 # DPI支持
@@ -33,6 +33,13 @@ def get_zoom_resolution():
     real = get_real_resolution()
     ratio = get_zoom_ratio()
     return math.floor(real[0] / ratio), math.floor(real[1] / ratio)
+
+
+# 获取鼠标当前位置的xy坐标
+def get_mouse_position():
+    x, y = pyautogui.position()
+    ratio = get_zoom_ratio()
+    return math.floor(x / ratio), math.floor(y / ratio)
 
 
 def all_hwnd(hwnd, mouse):

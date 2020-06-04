@@ -3,7 +3,7 @@
 
 import time
 import math
-import pyautogui
+import random
 from lib import screen
 from chip.ch9329 import map
 
@@ -43,7 +43,7 @@ def get_xyz(val):
     if val == 0:
         return 0
     val = math.floor(val)
-    offset = 0
+    offset = val
     if val > 0:
         if val > 127:
             offset = 127
@@ -132,11 +132,13 @@ def word(words, delay):
 mouse_cur_btn = "NONE"
 
 
-# 鼠标立刻移动到(x,y)
-def mouse_portal(x, y):
+# 鼠标立刻移动到({"x": 0, "y": 0})
+def mouse_portal(position):
+    global hid_com
+    x = position["x"]
+    y = position["y"]
     if x is None or y is None:
         return
-    global hid_com
     if hid_com is None:
         return
     put = [0x57, 0xAB, 0x00, 0x04, 0x07, 0x02, 0x00]
@@ -163,46 +165,83 @@ def mouse_portal(x, y):
     time.sleep(0.1)
 
 
-# 鼠标移动到(x,y)
+# 鼠标移动到({"x": 0, "y": 0})
 # x偏移像素
 # 向右为 1->127，向左为 -1->-127
 # 向右为 0x01->0x7F，向左为 0x80->0xFF
-def mouse_move(x, y):
+def mouse_move(position):
+    global mouse_cur_btn
+    global hid_com
+    x = position["x"]
+    y = position["y"]
     if x is None or y is None:
         return
-    global hid_com
     if hid_com is None:
         return
     # 获取当前鼠标的位置
-    ptx, pty = pyautogui.position()
-    while (True):
-        px = math.floor((x - ptx) / 50)
-        py = math.floor((y - pty) / 30)
-        if abs(px) < 10:
+    ratio = screen.get_zoom_ratio()
+    sx, sy = screen.get_mouse_position()
+
+    step = math.floor(ratio * 8)
+    abs_x = abs(x - sx)
+    abs_y = abs(y - sy)
+
+    if abs_x < 3:
+        px = 0
+    elif abs_x < step:
+        px = x - sx
+    else:
+        px = step if x > sx else -step
+
+    if abs_y < 3:
+        py = 0
+    elif abs_y < step:
+        py = y - sy
+    elif px == 0:
+        py = step if y > sy else -step
+    else:
+        py = math.floor(px / (x - sx) * (y - sy))
+
+    limit = 0
+    while True:
+        limit += 1
+        if limit > 100:
+            break
+        ex, ey = screen.get_mouse_position()
+
+        print(px, py, x, y, ex, ey)
+        # px
+        if px > 0 and ex >= x:
             px = 0
-        if abs(py) < 10:
+        elif px < 0 and ex <= x:
+            px = 0
+        # py
+        if py > 0 and ey >= y:
             py = 0
-        if abs(px) < 10 and abs(py) < 10:
+        elif py < 0 and ey <= y:
+            py = 0
+        if px == 0 and py == 0:
+            mouse_portal(position)
             break
         put = [
             0x57, 0xAB, 0x00, 0x05, 0x05, 0x01,
             map.mouse[mouse_cur_btn],
-            get_xyz(px),
-            get_xyz(py),
+            get_xyz(px + random.randint(-2, 2)),
+            get_xyz(py + random.randint(-2, 2)),
             0x00
         ]
         # [累加和]收尾
         put.append(get_tail_low(put))
         # 操作鼠标
         hid_com.write(bytes(put))
-        time.sleep(0.02)
+        time.sleep(0.03)
 
 
 # 鼠标中键滚轮滚动
 def mouse_roll(z):
+    global hid_com
     if z is None:
         return
-    global hid_com
     if hid_com is None:
         return
     # [固定头部 0 - 5 ,按键 6, 0 0 0]
@@ -217,11 +256,13 @@ def mouse_roll(z):
 # 按下鼠标（不释放）
 # button LEFT | RIGHT | MID
 def mouse_press(button):
+    global mouse_cur_btn
+    global hid_com
     if button is None:
         return
-    global hid_com
     if hid_com is None:
         return
+    mouse_cur_btn = button
     # [固定头部 0 - 5 ,按键 6, 0 0 0]
     put = [0x57, 0xAB, 0x00, 0x05, 0x05, 0x01, map.mouse[button], 0x00, 0x00, 0x00]
     # [累加和]收尾
@@ -231,12 +272,12 @@ def mouse_press(button):
     time.sleep(0.1)
 
 
-# 释放鼠标
+# 释放鼠标按压
 def mouse_free():
     global mouse_cur_btn
-    mouse_cur_btn = "NONE"
     global hid_com
+    mouse_cur_btn = "NONE"
     if hid_com is None:
         return
-    hid_com.write(bytes([0x57, 0xAB, 0x00, 0x05, 0x05, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0D]))
+    hid_com.write(bytes([0x57, 0xAB, 0x00, 0x05, 0x05, 0x01, 0x00, 0x00, 0x00, 0x00, 0x0D]))
     time.sleep(0.1)
