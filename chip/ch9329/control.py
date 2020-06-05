@@ -193,7 +193,7 @@ def mouse_move(position):
     # 获取当前鼠标的位置
     sx, sy = screen.get_mouse_position()
 
-    step = math.floor(screen_ratio * random.randint(5, 6))
+    step = math.floor(3 / screen_ratio * random.randint(5, 6))
     abs_x = abs(x - sx)
     abs_y = abs(y - sy)
 
