@@ -7,9 +7,19 @@ from scripts.koei_sango import position
 screen_ratio = screen.get_zoom_ratio()
 
 
-def xywh_percent(rect, element):
+# 屏幕窗口偏移
+def xy_offset(rect, element):
     x = math.floor(rect["x_start"] + element["x"] / screen_ratio)
     y = math.floor(rect["y_start"] + element["y"] / screen_ratio)
+    w = math.floor(element["w"] / screen_ratio)
+    h = math.floor(element["h"] / screen_ratio)
+    return {"x": x, "y": y, "w": w, "h": h}
+
+
+# 窗口内相对区域截取
+def xywh_cap(element):
+    x = math.floor(element["x"] / screen_ratio)
+    y = math.floor(element["y"] / screen_ratio)
     w = math.floor(element["w"] / screen_ratio)
     h = math.floor(element["h"] / screen_ratio)
     return {"x": x, "y": y, "w": w, "h": h}
@@ -26,21 +36,21 @@ def run(com):  # 跑脚本
     control.mouse_free()
 
     # 上来尝试跳动画
-    control.mouse_move(xywh_percent(rect, position.center))
+    control.mouse_move(xy_offset(rect, position.center))
     control.mouse_press("LEFT")
     control.mouse_free()
 
     # 找作者名
-    cap_author = xywh_percent(rect, position.author)
+    cap_author = xywh_cap(position.author)
     print(cap_author)
-    screen.captura({
+    screen.tesseract({
         "hwnd": rect["hwnd"],
         "x": cap_author["x"], "y": cap_author["y"],
         "w": cap_author["w"], "h": cap_author["h"],
     })
 
     # 甩一波窗口
-    start = xywh_percent(rect, position.title)
+    start = xy_offset(rect, position.title)
     print(start)
     control.mouse_move(start)
     control.mouse_press("LEFT")
@@ -50,4 +60,3 @@ def run(com):  # 跑脚本
         limit -= 1
     control.mouse_move(start)
     control.mouse_free()
-

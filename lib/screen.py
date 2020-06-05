@@ -6,12 +6,22 @@ import pyautogui
 import sys
 import time
 import math
+import io
 import pytesseract
+from PIL import Image
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import QBuffer
 
 
 # DPI支持
 # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
+
+def QImage_to_PILimage(img):
+    buffer = QBuffer()
+    buffer.open(QBuffer.ReadWrite)
+    img.save(buffer, "PNG")
+    pil_im = Image.open(io.BytesIO(buffer.data()))
+    return pil_im
 
 
 # 获取屏幕分辨率缩放比例
@@ -79,13 +89,15 @@ def shot_title(title, save_dir):
             img.save(save_dir + title + "_" + str(time.time()) + ".jpg")
 
 
-# 分析区域
-# 最小化时截图黑色
-def captura(rect):
+# 分析区域文字
+def tesseract(rect):
     app = QApplication(sys.argv)
     screen = QApplication.primaryScreen()
     w = screen.grabWindow(rect["hwnd"], rect["x"], rect["y"], rect["w"], rect["h"])
-    img = w.toImage()
+    image = w.toImage()
+    image.save("C:/Users/hunzs/Desktop/tesseract.jpg")
+    pytesseract.image_to_string(QImage_to_PILimage(image),
+                                config="--psm 6 --oem 3 -c tessedit_char_whitelist=0123456789")
 
 
 # 去除边框毛玻璃的区域
