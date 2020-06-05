@@ -4,14 +4,14 @@ from chip.ch9329 import control
 from lib import screen
 from scripts.koei_sango import position
 
+screen_ratio = screen.get_zoom_ratio()
+
 
 def xywh_percent(rect, element):
-    rect_w = rect["x_end"] - rect["x_start"]
-    rect_h = rect["y_end"] - rect["y_start"]
-    x = math.floor(rect["x_start"] + rect_w * element["x"])
-    y = math.floor(rect["y_start"] + rect_h * element["y"])
-    w = math.floor(rect_w * element["w"]) if element["w"] is None else 0
-    h = math.floor(rect_h * element["h"]) if element["h"] is None else 0
+    x = math.floor(rect["x_start"] + element["x"] / screen_ratio)
+    y = math.floor(rect["y_start"] + element["y"] / screen_ratio)
+    w = math.floor(element["w"] / screen_ratio)
+    h = math.floor(element["h"] / screen_ratio)
     return {"x": x, "y": y, "w": w, "h": h}
 
 
@@ -25,16 +25,11 @@ def run(com):  # 跑脚本
     control.keyboard_free()
     control.mouse_free()
 
-    #
-    start = xywh_percent(rect, position.title)
-    print(start)
-    control.mouse_move(start)
+    # 上来尝试跳动画
+    control.mouse_move(xywh_percent(rect, position.center))
     control.mouse_press("LEFT")
-    limit = 10
-    while limit > 0:
-        control.mouse_move({"x": random.randint(0, 2000), "y": random.randint(0, 800)})
-        limit -= 1
-    control.mouse_move(start)
+    control.mouse_free()
+
     # 找作者名
     cap_author = xywh_percent(rect, position.author)
     print(cap_author)
@@ -44,4 +39,15 @@ def run(com):  # 跑脚本
         "w": cap_author["w"], "h": cap_author["h"],
     })
 
+    # 甩一波窗口
+    start = xywh_percent(rect, position.title)
+    print(start)
+    control.mouse_move(start)
+    control.mouse_press("LEFT")
+    limit = 10
+    while limit > 0:
+        control.mouse_move({"x": random.randint(0, 2000), "y": random.randint(0, 800)})
+        limit -= 1
+    control.mouse_move(start)
     control.mouse_free()
+

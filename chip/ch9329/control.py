@@ -213,8 +213,6 @@ def mouse_move(position):
     else:
         py = math.floor(abs(px) / abs_x * (y - sy))
 
-    print({"px": px, "py": py})
-
     while True:
         ex, ey = screen.get_mouse_position()
         # px

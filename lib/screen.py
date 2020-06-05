@@ -6,6 +6,7 @@ import pyautogui
 import sys
 import time
 import math
+import pytesseract
 from PyQt5.QtWidgets import QApplication
 
 
