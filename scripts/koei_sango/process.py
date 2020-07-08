@@ -28,46 +28,46 @@ def xywh_cap(element):
 
 
 def run(com):  # 跑脚本
-    control.set_com(com)  # 设置端口
+    c = control.Control(com)  # 设置端口
     rect = screen.get_window_rect("圣三国蜀汉传")
     if rect is None:
         return
     print(rect)
     # 上来先释放一波
-    control.keyboard_free()
-    control.mouse_free()
+    c.keyboard_free()
+    c.mouse_free()
     # 上来尝试跳动画
     offset = xy_offset(rect, position.center)
-    control.mouse_move(offset)
-    control.mouse_press("LEFT")
-    control.mouse_free()
+    c.mouse_move(offset)
+    c.mouse_press("LEFT")
+    c.mouse_free()
     time.sleep(1)
 
     # 按点按钮开心下
-    control.mouse_move(xy_offset(rect, position.main_btn3))
-    control.mouse_press("LEFT")
-    control.mouse_free()
+    c.mouse_move(xy_offset(rect, position.main_btn3))
+    c.mouse_press("LEFT")
+    c.mouse_free()
     time.sleep(0.2)
-    control.keyboard("ESC", 50)
+    c.keyboard("ESC", 50)
 
-    control.mouse_move(xy_offset(rect, position.main_btn2))
-    control.mouse_press("LEFT")
-    control.mouse_free()
+    c.mouse_move(xy_offset(rect, position.main_btn2))
+    c.mouse_press("LEFT")
+    c.mouse_free()
     time.sleep(0.2)
-    control.mouse_move(xy_offset(rect, position.main_btn2_close))
-    control.mouse_press("LEFT")
-    control.mouse_free()
+    c.mouse_move(xy_offset(rect, position.main_btn2_close))
+    c.mouse_press("LEFT")
+    c.mouse_free()
 
     # 甩一波窗口
     start = xy_offset(rect, position.title)
-    control.mouse_move(start)
-    control.mouse_press("LEFT")
+    c.mouse_move(start)
+    c.mouse_press("LEFT")
     limit = 10
     while limit > 0:
-        control.mouse_move({"x": random.randint(0, 2000), "y": random.randint(0, 800)})
+        c.mouse_move({"x": random.randint(0, 2000), "y": random.randint(0, 800)})
         limit -= 1
-    control.mouse_move(start)
-    control.mouse_free()
+    c.mouse_move(start)
+    c.mouse_free()
 
     # 找作者名
     # cap_author = xywh_cap(position.author)
@@ -79,6 +79,6 @@ def run(com):  # 跑脚本
     # })
 
     # 退出
-    control.mouse_move(xy_offset(rect, position.main_btn4))
-    control.mouse_press("LEFT")
-    control.mouse_free()
+    c.mouse_move(xy_offset(rect, position.main_btn4))
+    c.mouse_press("LEFT")
+    c.mouse_free()
