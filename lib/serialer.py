@@ -23,4 +23,4 @@ def init(port, script):
         return
 
     # 执行对应的脚本
-    eval(script + ".run(com)")
+    eval(script + ".Run(com)")

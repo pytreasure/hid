@@ -5,16 +5,14 @@ from chip.ch9329 import control
 from lib import screen
 
 
-def run(com):  # 跑脚本
-    c = control.Control(com)  # 设置端口
-    rect = screen.get_window_rect("跑跑卡丁车")
-    print(rect)
-    # # 上来先释放一波
-    # hid.keyboard_free()
-    # hid.mouse_free()
-    # once = 10
-    # while True:  # 死循环
-    #     once -= 1
-    #     if once < 0:
-    #         break
-    #     hid.keyboard("UP", 0)
+class Run:
+    def __init__(self, com):
+        self.screen_ratio = screen.get_zoom_ratio()
+        print(self.screen_ratio)
+
+        c = control.Control(com)  # 设置端口
+        rect = screen.get_window_rect("跑跑卡丁车")
+        if rect is None:
+            return
+        print(rect)
+        
