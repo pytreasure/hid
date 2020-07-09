@@ -13,9 +13,6 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QBuffer
 
 
-# DPI支持
-# QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling)
-
 def QImage_to_PILimage(img):
     buffer = QBuffer()
     buffer.open(QBuffer.ReadWrite)
@@ -90,14 +87,28 @@ def shot_title(title, save_dir):
 
 
 # 分析区域文字
-def tesseract(rect):
+# 支持简体中文、繁体中文、英语、数字
+# lang: chi_sim | chi_tra | eng
+# config:
+def tesseract(rect, lang=None, config=None):
     app = QApplication(sys.argv)
     screen = QApplication.primaryScreen()
     w = screen.grabWindow(rect["hwnd"], rect["x"], rect["y"], rect["w"], rect["h"])
     image = w.toImage()
-    image.save("C:/Users/hunzs/Desktop/tesseract.jpg")
-    pytesseract.image_to_string(QImage_to_PILimage(image),
-                                config="--psm 6 --oem 3 -c tessedit_char_whitelist=0123456789")
+    # image.save("C:/Users/hunzs/Desktop/tesseract.jpg")
+    if config is None:
+        if lang == "chi_sim" or lang == "chi_tra":
+            config = "-psm 9"
+        elif lang == "eng":
+            config = "-psm 6"
+        elif lang == "num":
+            lang = None
+            config = "tessedit_char_whitelist=0123456789"
+    return pytesseract.image_to_string(
+        QImage_to_PILimage(Image.open("C:/Users/hunzs/Desktop/tesseract.jpg")),
+        lang=lang,
+        config=config
+    )
 
 
 # 去除边框毛玻璃的区域
